@@ -68,6 +68,87 @@
         }
     }
 
+    class PityBernoulliModel extends CommonGachaModel {
+        constructor(pityDist, upRate = 0.5) {
+            super();
+            this.pityLayer = new PityLayer(pityDist);
+            this.layers.push(this.pityLayer);
+            this.upRate = upRate;
+        }
+
+        call(itemNum = 1, itemPity = 0) {
+            // No Guarantee State logic. Every pull is independent 50/50 (or rate).
+            // P(Win) = p_up. P(Lose) = 1-p_up.
+            // Wait, "Lose" means getting a 6-star but NOT the specific one.
+            // So getting Specific 6-star is geometric distribution of "Get 6-star" events?
+            // Yes. P(Specific | 6-star) = upRate.
+
+            // Dist of Getting 1 Specific:
+            // 1. Get 1st 6-star. (Dist A)
+            //    If Win (upRate), Done. Cost = Dist A.
+            //    If Lose (1-upRate), Need another Specific.
+            //    It's recursive: P(Cost = X) = upRate * P(DistA=X) + (1-upRate) * P(DistA + DistGetSpecific = X)
+            //    Actually, let's use Convolutions.
+            //    Let DistGetSpecific = S. DistGetAny6 = A.
+            //    S = upRate * A + (1-upRate) * (A convolve S) ... classic geometric series.
+            //    Alternatively: S = A convolve (GeoDist(upRate) scaled by A?) No.
+
+            // Simpler: 
+            // Probability of needing K 6-stars to get 1 Specific is Geometric(upRate).
+            // P(k=1) = upRate
+            // P(k=2) = (1-upRate)*upRate
+            // ...
+            // So TotalDist = Sum_k [ P(Need k 6-stars) * (A convolve A ... k times) ]
+
+            // Implementation:
+            // 1. Calculate P(Need k 6-stars).
+            // 2. Convolve.
+
+            const distFirst = this.pityLayer.getDist(itemPity);
+            const distFresh = this.pityLayer.getDist(0);
+
+            let totalDist = new FiniteDist([0]);
+            let currentConv = distFirst;
+
+            // Iterate until p is negligible
+            let pLose = 1 - this.upRate;
+            let currentP = this.upRate;
+
+            // Handling itemNum=1
+            // Loop k=1 to ...
+            for (let k = 1; k < 50; k++) { // 50 is heuristic limit for single item
+                totalDist = totalDist.add(currentConv.mul(currentP));
+
+                // Prep next
+                currentConv = currentConv.convolve(distFresh);
+                currentP *= pLose;
+                if (currentP < 1e-15) break;
+            }
+
+            if (itemNum === 1) return totalDist;
+
+            // For itemNum > 1, convolve totalDist (but careful: subsequent items always Fresh)
+            // Unlike DualPity where state matters, here state resets? No, typically "Specific" calc assumes you stop.
+            // But if getting 2 copies:
+            // 1st copy: uses itemPity.
+            // 2nd copy: starts fresh.
+
+            // Recalculate Fresh Specific Dist
+            let freshSpecificDist = new FiniteDist([0]);
+            let freshConv = distFresh;
+            currentP = this.upRate;
+            for (let k = 1; k < 50; k++) {
+                freshSpecificDist = freshSpecificDist.add(freshConv.mul(currentP));
+                freshConv = freshConv.convolve(distFresh);
+                currentP *= pLose;
+                if (currentP < 1e-15) break;
+            }
+
+            const restDist = freshSpecificDist.pow(itemNum - 1);
+            return totalDist.convolve(restDist);
+        }
+    }
+
     /**
      * Capturing Radiance Model (Genshin 5.0+)
      * Ported from GGanalysis/games/genshin_impact/gacha_model.py
@@ -253,6 +334,7 @@
 
     global.GG.CommonGachaModel = CommonGachaModel;
     global.GG.DualPityModel = DualPityModel;
+    global.GG.PityBernoulliModel = PityBernoulliModel;
     global.GG.CapturingRadianceModel = CapturingRadianceModel;
 
 })(window);
