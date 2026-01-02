@@ -23,8 +23,10 @@
     // NOTE: If using strict mode, pass these params.
     const GenshinCharacterModel = new CapturingRadianceModel(PITY_5STAR_DIST, [0, 0, 0, 1]);
 
-    // Weapon Pool (75/25) - Standard DualPity
-    const GenshinWeaponModel = new DualPityModel(PITY_W5STAR_DIST, [0, 0.75, 1]);
+    // Weapon Pool
+    // Rate: 0.375 for specific target (Fate Point = 1 system)
+    // 0.75 is for ANY featured. 0.75 / 2 = 0.375 for specific.
+    const GenshinWeaponModel = new DualPityModel(PITY_W5STAR_DIST, [0, 0.375, 1]);
 
     global.GG.Models['genshin'] = {
         name: '原神 (Genshin Impact)',

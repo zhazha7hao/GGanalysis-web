@@ -50,9 +50,26 @@
     const btns = document.querySelectorAll('#calc-form button');
     btns.forEach(b => b.style.display = 'none');
 
+    // Slider Sync Helper
+    function bindSlider(sliderId, numberId) {
+        const slider = document.getElementById(sliderId);
+        const number = document.getElementById(numberId);
+        if (!slider || !number) return;
+
+        slider.addEventListener('input', () => {
+            number.value = slider.value;
+        });
+        number.addEventListener('input', () => {
+            slider.value = number.value;
+        });
+    }
+
+    bindSlider('char-item-slider', 'char-item-num');
+    bindSlider('weapon-item-slider', 'weapon-item-num');
+
     // Input Listeners regarding auto-calc
     elements.inputs.forEach(input => {
-        // Use 'input' for text/number, 'change' for select
+        // Use 'input' for text/number/range, 'change' for select/radio
         input.addEventListener('input', triggerCalc);
         input.addEventListener('change', triggerCalc);
     });
@@ -107,19 +124,29 @@
         const weaponModel = config.weapon.model;
 
         // Robust Element getting
-        const getVal = (id) => {
-            const el = document.getElementById(id);
-            if (!el) return 0;
-            return parseInt(el.value, 10);
+        const getVal = (idOrName) => {
+            // Try ID first
+            const el = document.getElementById(idOrName);
+            if (el) return parseInt(el.value, 10);
+
+            // Try Radio Name
+            const radios = document.getElementsByName(idOrName);
+            if (radios.length > 0) {
+                for (let r of radios) {
+                    if (r.checked) return parseInt(r.value, 10);
+                }
+                return 0; // Default
+            }
+            return 0;
         };
 
         const cNum = getVal('char-item-num');
         const cPity = getVal('char-pity') || 0;
-        const cGuaranteed = getVal('char-guaranteed');
+        const cGuaranteed = getVal('char-guaranteed'); // Now by name
 
         const wNum = getVal('weapon-item-num');
         const wPity = getVal('weapon-pity') || 0;
-        const wGuaranteed = getVal('weapon-guaranteed');
+        const wGuaranteed = getVal('weapon-guaranteed'); // Now by name
 
         // Logic to prevent 0,0 calc
         if ((isNaN(cNum) || cNum === 0) && (isNaN(wNum) || wNum === 0)) {

@@ -34,7 +34,10 @@
                             <h3 id="char-label">角色池 (Character)</h3>
                             <div class="form-group">
                                 <label for="char-item-num">目标数量 (个)</label>
-                                <input type="number" id="char-item-num" value="1" min="0" max="7">
+                                <div class="slider-container">
+                                    <input type="range" id="char-item-slider" min="0" max="7" value="1">
+                                    <input type="number" id="char-item-num" value="1" min="0" max="7">
+                                </div>
                                 <span class="hint">0 = 不抽, 1 = 0命, 7 = 6命</span>
                             </div>
                             <div class="form-group">
@@ -42,11 +45,17 @@
                                 <input type="number" id="char-pity" value="0" min="0" max="89">
                             </div>
                             <div class="form-group" id="char-guaranteed-box">
-                                <label for="char-guaranteed">是否有大保底?</label>
-                                <select id="char-guaranteed">
-                                    <option value="0">否</option>
-                                    <option value="1">是</option>
-                                </select>
+                                <label>是否有大保底?</label>
+                                <div class="radio-group">
+                                    <label>
+                                        <input type="radio" name="char-guaranteed" value="0" checked>
+                                        否
+                                    </label>
+                                    <label>
+                                        <input type="radio" name="char-guaranteed" value="1">
+                                        是
+                                    </label>
+                                </div>
                             </div>
                         </div>
 
@@ -57,7 +66,10 @@
                             <h3 id="weapon-label">武器池 (Weapon)</h3>
                             <div class="form-group">
                                 <label for="weapon-item-num">目标数量 (个)</label>
-                                <input type="number" id="weapon-item-num" value="0" min="0" max="5">
+                                <div class="slider-container">
+                                    <input type="range" id="weapon-item-slider" min="0" max="5" value="0">
+                                    <input type="number" id="weapon-item-num" value="0" min="0" max="5">
+                                </div>
                                 <span class="hint">0 = 不抽, 1 = 1精, 5 = 5精</span>
                             </div>
                             <div class="form-group">
@@ -65,18 +77,26 @@
                                 <input type="number" id="weapon-pity" value="0" min="0" max="79">
                             </div>
                             <div class="form-group" id="weapon-guaranteed-box">
-                                <label for="weapon-guaranteed">是否有大保底?</label>
-                                <select id="weapon-guaranteed">
-                                    <option value="0">否</option>
-                                    <option value="1">是</option>
-                                </select>
+                                <label>是否有大保底?</label>
+                                <div class="radio-group">
+                                    <label>
+                                        <input type="radio" name="weapon-guaranteed" value="0" checked>
+                                        否
+                                    </label>
+                                    <label>
+                                        <input type="radio" name="weapon-guaranteed" value="1">
+                                        是
+                                    </label>
+                                </div>
                             </div>
                         </div>
 
-                        <button type="submit" class="btn-primary">开始计算 (Calculate)</button>
+                        <button type="submit" class="btn-primary" style="display:none;">开始计算 (Calculate)</button>
                     </form>
                 </div>
+            </section>
 
+            <section class="visualization">
                 <div class="card results">
                     <h2>计算结果 (需抽数)</h2>
                     <div class="stats-grid">
@@ -90,9 +110,7 @@
                         </div>
                     </div>
                 </div>
-            </section>
 
-            <section class="visualization">
                 <div class="card full-width">
                     <h2>概率分布图 (Probability Distribution)</h2>
                     <canvas id="prob-chart"></canvas>
