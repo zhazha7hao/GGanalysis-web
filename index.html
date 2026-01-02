@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>抽卡概率计算器 (Gacha Calculator)</title>
+    <link rel="stylesheet" href="styles.css">
+    <!-- Chart.js -->
+    <!-- Chart.js -->
+    <script src="js/libs/chart.js"></script>
+</head>
+
+<body>
+    <div class="app-container">
+        <header>
+            <h1>抽卡概率计算器</h1>
+            <nav>
+                <button type="button" class="nav-btn active" data-game="genshin">原神 (Genshin)</button>
+                <button type="button" class="nav-btn" data-game="hsr">星穹铁道 (HSR)</button>
+                <button type="button" class="nav-btn" data-game="zzz">绝区零 (ZZZ)</button>
+            </nav>
+        </header>
+
+        <main>
+            <section class="controls">
+                <div class="card">
+                    <h2>参数配置</h2>
+                    <p class="hint">输入 0 表示不计算该项。</p>
+                    <form id="calc-form">
+
+                        <!-- 角色参数 -->
+                        <div class="input-section">
+                            <h3 id="char-label">角色池 (Character)</h3>
+                            <div class="form-group">
+                                <label for="char-item-num">目标数量 (个)</label>
+                                <input type="number" id="char-item-num" value="1" min="0" max="7">
+                                <span class="hint">0 = 不抽, 1 = 0命, 7 = 6命</span>
+                            </div>
+                            <div class="form-group">
+                                <label for="char-pity">当前已垫抽数</label>
+                                <input type="number" id="char-pity" value="0" min="0" max="89">
+                            </div>
+                            <div class="form-group" id="char-guaranteed-box">
+                                <label for="char-guaranteed">是否有大保底?</label>
+                                <select id="char-guaranteed">
+                                    <option value="0">否</option>
+                                    <option value="1">是</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <hr class="separator">
+
+                        <!-- 武器参数 -->
+                        <div class="input-section">
+                            <h3 id="weapon-label">武器池 (Weapon)</h3>
+                            <div class="form-group">
+                                <label for="weapon-item-num">目标数量 (个)</label>
+                                <input type="number" id="weapon-item-num" value="0" min="0" max="5">
+                                <span class="hint">0 = 不抽, 1 = 1精, 5 = 5精</span>
+                            </div>
+                            <div class="form-group">
+                                <label for="weapon-pity">当前已垫抽数</label>
+                                <input type="number" id="weapon-pity" value="0" min="0" max="79">
+                            </div>
+                            <div class="form-group" id="weapon-guaranteed-box">
+                                <label for="weapon-guaranteed">是否有大保底?</label>
+                                <select id="weapon-guaranteed">
+                                    <option value="0">否</option>
+                                    <option value="1">是</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <button type="submit" class="btn-primary">开始计算 (Calculate)</button>
+                    </form>
+                </div>
+
+                <div class="card results">
+                    <h2>计算结果 (需抽数)</h2>
+                    <div class="stats-grid">
+                        <div class="stat-item">
+                            <span class="label">期望 (Expectation)</span>
+                            <span class="value" id="res-exp">-</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="label">方差 (Variance)</span>
+                            <span class="value" id="res-var">-</span>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section class="visualization">
+                <div class="card full-width">
+                    <h2>概率分布图 (Probability Distribution)</h2>
+                    <canvas id="prob-chart"></canvas>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <!-- Scripts -->
+    <script src="js/logic/distribution.js"></script>
+    <script src="js/logic/layer.js"></script>
+    <script src="js/logic/model.js"></script>
+    <script src="js/logic/games/genshin.js"></script>
+    <script src="js/logic/games/hsr.js"></script>
+    <script src="js/logic/games/zzz.js"></script>
+    <script src="js/ui/charts.js"></script>
+    <script src="js/ui/main.js"></script>
+</body>
+
+</html>
