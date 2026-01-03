@@ -8,17 +8,10 @@
     global.GG = global.GG || {};
     const { linearPIncrease, p2dist, DualPityModel } = global.GG;
 
-    // 6-star Pity Table
-    // PITY_6STAR[1:61] = 0.015 (indices 1 to 60)
-    // PITY_6STAR[61:71] = np.arange(1, 11) * 0.025 + 0.015
-    // k=1 (61) -> 0.04. k=10 (70) -> 0.25+0.015 = 0.265? No.
-    // Let's re-read python code: `np.arange(1, 11) * 0.025 + 0.015`
-    // P[61] = 0.015 + 0.025 = 0.04.
-    // P[70] = 0.015 + 10*0.025 = 0.265.
-    // AND `PITY_6STAR[70] = 1`. Hard set.
-    // So distinct jump at 70? Or logic implies hard pity.
-
-    // JS Array size 71.
+    // 6-star Pity Table (0-70)
+    // 1-60: 0.015
+    // 61-70: Increase by 0.025
+    // 70: 1.0 (Hard Pity)
     const P = new Float64Array(71);
     for (let i = 1; i <= 60; i++) P[i] = 0.015;
     for (let i = 61; i < 70; i++) {
@@ -28,35 +21,44 @@
 
     const P_DIST = p2dist(P);
 
-    // Character: 50/50 DualPity
-    const R1999CharacterModel = new DualPityModel(P_DIST, [0, 0.5, 1]);
+    // Models
+    // 1. Activity (Single UP): 50/50, Guarantee.
+    const R1999SingleUpModel = new DualPityModel(P_DIST, [0, 0.5, 1]);
 
-    // Weapon (Actually thoughts? Rev1999 doesn't have weapons in same way?)
-    // User requested support.
-    // Usually people calculating Characters.
-    // If inputting for "Weapon" slot, maybe use it for "Standard Specific 6★"? 
-    // Python code `specific_stander_6star` is PityBernoulli(1/11)?
-    // Let's just create a duplicate Character model for "Standard 6★" or similar if requested.
-    // For now, let's map "Weapon" to "Common 6★" (Standard Pool)?
-    // Or just disable it / make it same as character for now?
-    // Actually, let's look at `gacha_model.py`. `specific_up_5star`.
-    // Let's provide standard UP logic for both slots for simple usage, assuming user puts "0" if unused.
-
-    const R1999WeaponModel = new DualPityModel(P_DIST, [0, 0.5, 1]);
+    // 2. Dual UP (Specific): 70% UP (2 chars), 50% specific within UP.
+    // Class Pity (70/30) -> Specific Bernoulli (50/50).
+    // Note: The guaranteed box UI will reflect "Guaranteed Class".
+    // If Guaranteed is set, Model treats as Class Guaranteed.
+    const R1999DualUpModel = new window.GG.Models.DualPityBernoulliModel(P_DIST, [0, 0.7, 1], 0.5);
 
     global.GG.Models['reverse_1999'] = {
         name: '重返未来1999 (Reverse: 1999)',
+        hasModes: true,
+        modes: [
+            {
+                id: 'single_up',
+                name: '活动征集 (单UP/Single UP)',
+                description: '标准活动卡池，50%概率UP，歪后保底 (Standard 50/50)',
+                model: R1999SingleUpModel
+            },
+            {
+                id: 'dual_up',
+                name: '轮换/双UP (特定6★/Specific)',
+                description: '双UP卡池捞特定角色 (70% UP, 50% Specific)',
+                model: R1999DualUpModel
+            }
+        ],
         character: {
-            name: '活动征集 (6★角色)',
-            model: R1999CharacterModel,
+            name: '角色 (Character)',
+            model: R1999SingleUpModel, // Default
             baseProb: '1.5%',
             pity: '70'
         },
         weapon: {
-            name: '活动征集 (6★角色)', // Just duplicate for now unless specific
-            model: R1999WeaponModel,
-            baseProb: '1.5%',
-            pity: '70'
+            name: '无 (None)',
+            model: null,
+            baseProb: '-',
+            pity: '-'
         }
     };
 
