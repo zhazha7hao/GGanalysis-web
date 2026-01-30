@@ -167,6 +167,7 @@
             this.specificDist = this.zeroDist; // Default for compatibility
         }
         call(itemNum = 1, itemPity = 0, typePity = 0) {
+            if (itemNum <= 0) return new FiniteDist([1]);
             let firstDist;
             if (typePity === 0 && this.typePullShift === 0) {
                 firstDist = this.zeroDist;
@@ -198,6 +199,7 @@
         }
 
         call(itemNum = 1) {
+            if (itemNum <= 0) return new FiniteDist([1]);
             const distOne6 = this.pityDist;
             let distOneUP = new FiniteDist([0]);
             let curr = distOne6;

@@ -80,10 +80,14 @@
             let j = 1;
             while (true) {
                 const pos = rewardRule(j);
-                if (pos >= maxLength && k - j < 0) break; // Optimization
+                if (pos >= maxLength && (k - j) < 0) break; // Optimization
+                // Safety break if pos is not increasing or stuck (though rule implies linear)
+                if (rewardPos.length > 0 && pos <= rewardPos[rewardPos.length - 1]) break;
+
                 rewardPos.push(pos);
                 j++;
-                if (j > k + 5) break; // Safety
+                // Safety limit: if we are asking for more rewards than k (target) + reasonable buffer
+                if (j > k + 10) break;
             }
 
             let currentRewardIdx = 0; // 0 rewards
@@ -131,6 +135,9 @@
         }
 
         call(itemNum = 1) {
+            // Early return for 0 items
+            if (itemNum <= 0) return new global.GG.FiniteDist([1]);
+
             // 1. Calculate Raw Distributions (Without Spark)
 
             // Dist for 1st item (Truncated at 120)
@@ -204,6 +211,8 @@
         }
 
         call(itemNum = 1) {
+            if (itemNum <= 0) return new global.GG.FiniteDist([1]);
+
             // Same logic as Character
             let distFirst = this.baseModel.call(1);
             if (distFirst.dist.length > this.hardPityLimit + 1) {

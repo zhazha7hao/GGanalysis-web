@@ -37,7 +37,7 @@
             end = Math.min(dist.length - 1, end + 10);
 
             // Check spacing. If range > 200, sample it?
-            const step = Math.ceil((end - start) / 300);
+            const step = Math.max(1, Math.ceil((end - start) / 300));
 
             for (let i = start; i <= end; i += step) {
                 labels.push(i);
