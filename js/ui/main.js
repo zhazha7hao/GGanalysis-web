@@ -160,6 +160,14 @@
             }
         }
 
+        // Hide Guaranteed for Endfield (Uses Hard Pity Counter logic internally, not boolean toggle)
+        if (game === 'arknights_endfield') {
+            if (charGuaranteedBox) charGuaranteedBox.style.display = 'none';
+            // Also hide weapon guaranteed
+            const weaponGuaranteedBox = document.getElementById('weapon-guaranteed-box');
+            if (weaponGuaranteedBox) weaponGuaranteedBox.style.display = 'none';
+        }
+
         if (elements.charLabel) elements.charLabel.textContent = config.character.name;
         if (elements.weaponLabel) {
             elements.weaponLabel.textContent = config.weapon.name;
