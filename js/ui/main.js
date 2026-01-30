@@ -41,6 +41,7 @@
 
         resExp: document.getElementById('res-exp'),
         resVar: document.getElementById('res-var'),
+        resAvg: document.getElementById('res-avg'),
     };
 
     let currentGame = 'genshin';
@@ -253,17 +254,23 @@
 
             let weaponDist = (wNum > 0) ? weaponModel.call(wNum, wPity, wGuaranteed) : new window.GG.FiniteDist([1]);
             const finalDist = charDist.mul(weaponDist);
-            updateUI(finalDist);
+            const totalItems = (isNaN(cNum) ? 0 : cNum) + (isNaN(wNum) ? 0 : wNum);
+            updateUI(finalDist, totalItems);
         } catch (e) {
             console.error("Calculation Error", e);
             elements.resExp.textContent = "Error";
             elements.resVar.textContent = "Error";
+            if (elements.resAvg) elements.resAvg.textContent = "Error";
         }
     }
 
-    function updateUI(dist) {
+    function updateUI(dist, totalItems = 1) {
         if (elements.resExp) elements.resExp.textContent = dist.exp.toFixed(2);
         if (elements.resVar) elements.resVar.textContent = dist.var.toFixed(2);
+        if (elements.resAvg) {
+            const avg = totalItems > 0 ? (dist.exp / totalItems) : 0;
+            elements.resAvg.textContent = avg.toFixed(2);
+        }
 
         if (chartWrapper) {
             try {
